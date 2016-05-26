@@ -60,14 +60,13 @@
         </Tab>
       </tabs>
     </TabPane>
-    <Pane fx:id="standartizedPane" disable="false" layoutX="7.0" layoutY="553.0" prefHeight="147.0" prefWidth="255.0" visible="true">
+    <Pane fx:id="standartizedPane" disable="false" layoutX="7.0" layoutY="560.0" prefHeight="147.0" prefWidth="255.0" visible="true">
       <children>
         <CheckBox fx:id="standartizeCB" layoutX="22.0" layoutY="34.0" mnemonicParsing="false" onMouseClicked="#standatizationClicked" text="Standartized data" />
         <RadioButton fx:id="middleStandartRB" disable="true" layoutX="36.0" layoutY="58.0" mnemonicParsing="false" onMouseClicked="#middleStandartRBClicked" selected="false" text="to middle value" underline="false" visible="true" />
-        <RadioButton fx:id="squareMiddleStandartRB" disable="true" layoutX="36.0" layoutY="77.0" mnemonicParsing="false" onMouseClicked="#squareMiddleStandartRBClicked" selected="true" text="to middle and square middle value" visible="true" />
-        <RadioButton fx:id="intervalStandartRB" disable="true" layoutX="36.0" layoutY="97.0" mnemonicParsing="false" onMouseClicked="#intervalStandartRBClicked" text="to interval: [           ;            ]" visible="false" />
-        <TextField fx:id="intervalStartTF" disable="true" layoutX="121.0" layoutY="97.0" prefHeight="15.9608154296875" prefWidth="30.0" text="0" visible="false" />
-        <TextField fx:id="intervalEndTF" disable="true" layoutX="163.0" layoutY="98.0" prefHeight="15.960959570315026" prefWidth="30.0" text="1" visible="false" />
+        <RadioButton fx:id="intervalStandartRB" disable="true" layoutX="36.0" layoutY="80.0" mnemonicParsing="false" onMouseClicked="#intervalStandartRBClicked" text="to interval: [           ;            ]" visible="true" />
+        <TextField fx:id="intervalStartTF" disable="true" layoutX="121.0" layoutY="80.0" prefHeight="15.9608154296875" prefWidth="30.0" text="0" visible="true" />
+        <TextField fx:id="intervalEndTF" disable="true" layoutX="163.0" layoutY="81.0" prefHeight="15.960959570315026" prefWidth="30.0" text="1" visible="true" />
       </children>
     </Pane>
     <Label layoutX="29.0" layoutY="53.0" text="Initial data" />

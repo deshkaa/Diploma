@@ -27,7 +27,6 @@ public class Data {
     private double eigValuesSum;
     private ArrayList<Double> components_values = new ArrayList<>();
     private ArrayList<double[]> components_vectors = new ArrayList<>();
-    //private ArrayList<double[]> factors = new ArrayList<>();
     private ArrayList<ArrayList<Double>> factors = new ArrayList<>();
     private ArrayList<ArrayList<Integer>> partition = new ArrayList<>();
 
@@ -47,8 +46,13 @@ public class Data {
         return newObjectsData;
     }
 
-    public ArrayList<ArrayList<Double>> getStandartizedObjectsData(String parametr) {
-        this.standartizedObjectsData = standartize(objectsData, parametr);
+    public ArrayList<ArrayList<Double>> getStandartizedObjectsData() {
+        this.standartizedObjectsData = standartize(objectsData);
+        return standartizedObjectsData;
+    }
+
+    public ArrayList<ArrayList<Double>> getStandartizedObjectsData(int a, int b) {
+        this.standartizedObjectsData = standartize(objectsData, a, b);
         return standartizedObjectsData;
     }
 
@@ -102,8 +106,7 @@ public class Data {
         return components_values;
     }
 
-    public static ArrayList<ArrayList<Double>> standartize(ArrayList<ArrayList<Double>> objectsData,
-                                                           String parametr) {
+    public static ArrayList<ArrayList<Double>> standartize(ArrayList<ArrayList<Double>> objectsData) {
         ArrayList<ArrayList<Double>> featuresData = getTransposedData(objectsData);
         ArrayList<ArrayList<Double>> newDataFeatures = new ArrayList<>();
         for (ArrayList<Double> list : featuresData) {
@@ -112,13 +115,40 @@ public class Data {
             ArrayList<Double> newList = new ArrayList<>();
             for (Double element : list) {
                 element = Math.abs(middleValue - element);
-                if (parametr.equals("middle square")) element /= middleSquareValue;
+                element /= middleSquareValue;
                 newList.add(element);
             }
             newDataFeatures.add(newList);
         }
-        ArrayList<ArrayList<Double>> newDataObjects = getTransposedData(newDataFeatures);
-        return newDataObjects;
+        return getTransposedData(newDataFeatures);
+    }
+
+    public static ArrayList<ArrayList<Double>> standartize(ArrayList<ArrayList<Double>> objectsData, int a, int b) {
+        ArrayList<ArrayList<Double>> featuresData = getTransposedData(objectsData);
+        ArrayList<ArrayList<Double>> newDataFeatures = new ArrayList<>();
+        double dif = Math.abs(b-a);
+        for (ArrayList<Double> list : featuresData) {
+            double min, max;
+            min = max = list.get(0);
+            for (Double element : list) {
+                if (element < min)
+                    min = element;
+                if (element > max)
+                    max = element;
+            }
+
+            ArrayList<Double> newList = new ArrayList<>();
+            for (Double element : list) {
+                element -= min;
+                element /= max - min;
+
+                element *= dif;
+                element += a;
+                newList.add(element);
+            }
+            newDataFeatures.add(newList);
+        }
+        return getTransposedData(newDataFeatures);
     }
 
     public ArrayList<ArrayList<Double>> getEigenTableModel() {

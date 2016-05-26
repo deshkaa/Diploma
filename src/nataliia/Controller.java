@@ -178,7 +178,7 @@ public class Controller {
     public void standatizationClicked(Event event) {
         boolean selected = standartizeCB.isSelected();
 
-        workingData = (selected) ? dataObject.getStandartizedObjectsData("middle square") : dataObject.getObjectsData();
+        workingData = (selected) ? dataObject.getStandartizedObjectsData() : dataObject.getObjectsData();
         loadDataToTableView(dataTable, workingData, 0);
 
         squareMiddleStandartRB.setSelected(selected);
@@ -198,18 +198,23 @@ public class Controller {
     }
 
     public void middleStandartRBClicked(Event event) {
-        workingData = dataObject.getStandartizedObjectsData("middle");
-        loadDataToTableView(dataTable, workingData, 0);
-    }
-
-    public void squareMiddleStandartRBClicked(Event event) {
-        workingData = dataObject.getStandartizedObjectsData("middle square");
+        workingData = dataObject.getStandartizedObjectsData();
         loadDataToTableView(dataTable, workingData, 0);
     }
 
     public void intervalStandartRBClicked(Event event) {
-        workingData = dataObject.getStandartizedObjectsData("interval");
-        loadDataToTableView(dataTable, workingData, 0);
+        String start, end;
+        if (!(start = intervalStartTF.getText()).equals("") && !(end = intervalEndTF.getText()).equals("")) {
+            Integer intervalStart, intervalEnd;
+            try {
+                intervalStart = Integer.valueOf(start);
+                intervalEnd = Integer.valueOf(end);
+                workingData = dataObject.getStandartizedObjectsData(intervalStart,intervalEnd);
+                loadDataToTableView(dataTable, workingData, 0);
+            } catch (NumberFormatException e) {
+                intervalStartTF.setText("Please, enter ONLY INTEGER numbers here");
+            }
+        }
     }
 
     public void dispMinValueRBClicked(Event event) {
