@@ -13,9 +13,9 @@
     <TableView fx:id="dataTable" disable="false" layoutX="14.0" layoutY="69.0" prefHeight="504.0" prefWidth="232.0" visible="true" />
     <TabPane fx:id="methodsTabPane" disable="false" layoutX="269.0" layoutY="0.0" prefHeight="686.0" prefWidth="631.0" tabClosingPolicy="UNAVAILABLE" visible="true">
       <tabs>
-        <Tab text="Principal components method">
+        <Tab fx:id="principalComponentsMethodTab" text="Principal components method">
           <content>
-            <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="655.0" prefWidth="631.0">
+            <AnchorPane id="Content" fx:id="anchorPaneTab1" minHeight="0.0" minWidth="0.0" prefHeight="655.0" prefWidth="631.0">
               <children>
                 <Button fx:id="calculateBtn" layoutX="8.0" layoutY="24.0" mnemonicParsing="false" onAction="#calculateBtnClick" prefHeight="31.0" prefWidth="386.0" text="Calculate pripncipal components" />
                 <TableView id="eigenValuesTableView" fx:id="eigenValuesTable" layoutX="8.0" layoutY="76.0" prefHeight="168.0" prefWidth="386.0" visible="true" />
@@ -48,12 +48,28 @@
             </AnchorPane>
           </content>
         </Tab>
-        <Tab text="Extremal grouping method">
+        <Tab id="extremalGroupingMethodTab" fx:id="extremalGroupingMethodTab" disable="true" text="Extremal grouping method">
           <content>
-            <AnchorPane id="Content" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+            <AnchorPane fx:id="anchorPaneTab2" prefHeight="200.0" prefWidth="200.0" visible="true">
               <children>
-                <TextField fx:id="groupCountTF" layoutX="49.0" layoutY="70.0" prefWidth="200.0" />
-                <Label layoutX="49.0" layoutY="40.0" text="Number of groups" />
+                <Pane layoutX="8.0" layoutY="14.0" prefHeight="200.0" prefWidth="200.0">
+                  <children>
+                    <Pane layoutX="14.0" layoutY="14.0" prefHeight="92.0" prefWidth="352.0">
+                      <children>
+                        <Label layoutX="14.0" layoutY="14.0" text="Number of groups" />
+                        <TextField fx:id="groupCountTF" layoutX="126.0" layoutY="14.0" prefWidth="56.0" text="2" />
+                        <TextField fx:id="epselenTF" layoutX="289.0" layoutY="14.0" prefWidth="56.000099999997474" text="0.01" />
+                        <Label layoutX="226.0" layoutY="17.0" text="Epselen" />
+                        <Button fx:id="startExtremalGroupingBtn" layoutX="14.0" layoutY="54.0" mnemonicParsing="false" onMouseClicked="#startExtremalGroupingClicked" prefHeight="32.0" prefWidth="331.0" text="Start extremal grouping" />
+                      </children>
+                    </Pane>
+                    <TableView fx:id="factorsCorelationTable" layoutX="28.0" layoutY="137.0" prefHeight="405.0" prefWidth="338.0000999999975" />
+                    <TableView fx:id="newFactorsTable" layoutX="417.0" layoutY="39.0" prefHeight="504.0" prefWidth="190.0" />
+                    <Label layoutX="28.0" layoutY="109.0" text="Corelation between initial features and principal components" />
+                    <Label layoutX="432.0" layoutY="18.0" text="Data form factors" />
+                    <Button fx:id="saveFactorsBtn" layoutX="417.0" layoutY="555.0" mnemonicParsing="false" onMouseClicked="#saveFactorsBtnClicked" prefHeight="32.0" prefWidth="190.0" text="Save factors" />
+                  </children>
+                </Pane>
               </children>
             </AnchorPane>
           </content>

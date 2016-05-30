@@ -6,11 +6,15 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
@@ -33,7 +37,7 @@ public class Controller {
     public TextField dispMinValueTF, dispPercentSumTF, componentsCountTF;
     public TextField intervalStartTF, intervalEndTF;
     public CheckBox standartizeCB;
-    public RadioButton middleStandartRB, squareMiddleStandartRB, intervalStandartRB;
+    public RadioButton middleStandartRB, intervalStandartRB;
     public Pane cryteriaPane;
     public RadioButton dispMinValueRB, dispPercentSumRB, componentsCountRB;
     public TabPane methodsTabPane;
@@ -43,6 +47,16 @@ public class Controller {
     public LineChart<Number, Number> chart;
     public NumberAxis yAxis;
     public NumberAxis xAxis;
+    public TextField epselenTF;
+    public TextField groupCountTF;
+    public Button startExtremalGroupingBtn;
+    public Tab extremalGroupingMethodTab;
+    public TableView newFactorsTable;
+    public TableView factorsCorelationTable;
+    public Button saveFactorsBtn;
+    public AnchorPane anchorPaneTab1;
+    public Tab principalComponentsMethodTab;
+    public AnchorPane anchorPaneTab2;
 
     JFileChooser jFileChooser;
     FileChooser fileChooser;
@@ -54,13 +68,15 @@ public class Controller {
     private boolean radiobuttonsCtyteriaAdded = false;
 
     private Data dataObject;
-    private ArrayList<ArrayList<Double>> workingData;
+    private ArrayList<ArrayList<Double>> workingObjectData;
+    //private ArrayList<ArrayList<Double>> workingFeatureData;
     private Eigen eigen;
     private ArrayList<Double> components = new ArrayList<>();
 
     @FXML
     private void initialize() {
         standartizedPane.setDisable(true);
+//        anchorPaneTab2.setVisible(false);
     }
 
     public void openButtonClick(ActionEvent actionEvent) throws FileNotFoundException {
@@ -71,7 +87,7 @@ public class Controller {
         if (readFile == null)
             return;
         dataObject = new Data(readFile);
-        workingData = dataObject.getObjectsData();
+        workingObjectData = dataObject.getObjectsData();
         methodsTabPane.setDisable(false);
         standartizedPane.setDisable(false);
         loadDataToTableView(dataTable, dataObject.getObjectsData(), 0);
@@ -164,25 +180,26 @@ public class Controller {
         jFileChooser = new JFileChooser();
         FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
         jFileChooser.setFileFilter(filter);
-        jFileChooser.setCurrentDirectory(new File("D:\\2 семестр\\диплом\\Diploma\\"));
+        jFileChooser.setCurrentDirectory(new File("D:"));//\\2 семестр\\диплом\\Diploma\\"));
         if (jFileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-            dataObject.saveSelectedComponentsObjectData(jFileChooser.getSelectedFile().getAbsoluteFile() + ".txt");
+            dataObject.saveSelectedComponentsObjectData(workingObjectData, jFileChooser.getSelectedFile().getAbsoluteFile() + ".txt");
             newDataTable.setVisible(true);
             loadDataToTableView(newDataTable, dataObject.getNewObjectsData(), 0);
         }
 
         corelationTable.setVisible(true);
-        loadDataToTableView(corelationTable, dataObject.getCorelationTableModel(), 2);
+        loadDataToTableView(corelationTable, dataObject.getComponentsCorelationTableModel(), 2);
+
+        extremalGroupingMethodTab.setDisable(false);
     }
 
     public void standatizationClicked(Event event) {
         boolean selected = standartizeCB.isSelected();
 
-        workingData = (selected) ? dataObject.getStandartizedObjectsData() : dataObject.getObjectsData();
-        loadDataToTableView(dataTable, workingData, 0);
+        workingObjectData = (selected) ? dataObject.getStandartizedObjectsData() : dataObject.getObjectsData();
+        loadDataToTableView(dataTable, workingObjectData, 0);
 
-        squareMiddleStandartRB.setSelected(selected);
-        squareMiddleStandartRB.setDisable(!selected);
+        middleStandartRB.setSelected(selected);
         middleStandartRB.setDisable(!selected);
         intervalStandartRB.setDisable(!selected);
         intervalStartTF.setDisable(!selected);
@@ -190,16 +207,18 @@ public class Controller {
 
         if (!radiobuttonsStandartAdded) {
             middleStandartRB.setToggleGroup(groupStandart);
-            squareMiddleStandartRB.setToggleGroup(groupStandart);
             intervalStandartRB.setToggleGroup(groupStandart);
 
             radiobuttonsStandartAdded = true;
         }
+
+        setIntervalTFOnKeyPressed(intervalStartTF, event);
+        setIntervalTFOnKeyPressed(intervalEndTF, event);
     }
 
     public void middleStandartRBClicked(Event event) {
-        workingData = dataObject.getStandartizedObjectsData();
-        loadDataToTableView(dataTable, workingData, 0);
+        workingObjectData = dataObject.getStandartizedObjectsData();
+        loadDataToTableView(dataTable, workingObjectData, 0);
     }
 
     public void intervalStandartRBClicked(Event event) {
@@ -209,12 +228,23 @@ public class Controller {
             try {
                 intervalStart = Integer.valueOf(start);
                 intervalEnd = Integer.valueOf(end);
-                workingData = dataObject.getStandartizedObjectsData(intervalStart,intervalEnd);
-                loadDataToTableView(dataTable, workingData, 0);
+                workingObjectData = dataObject.getStandartizedObjectsData(intervalStart, intervalEnd);
+                loadDataToTableView(dataTable, workingObjectData, 0);
             } catch (NumberFormatException e) {
                 intervalStartTF.setText("Please, enter ONLY INTEGER numbers here");
             }
         }
+    }
+
+    public void setIntervalTFOnKeyPressed(TextField textField, Event event) {
+        textField.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent ke) {
+                if (ke.getCode().equals(KeyCode.ENTER)) {
+                    intervalStandartRBClicked(event);
+                }
+            }
+        });
     }
 
     public void dispMinValueRBClicked(Event event) {
@@ -301,4 +331,48 @@ public class Controller {
         tableView.setItems(observableList);
     }
 
+    public void startExtremalGroupingClicked(Event event) {
+        String groupCountStr, epselenStr;
+        int groupCountInt;
+        double epselen;
+        if (!(groupCountStr = groupCountTF.getText()).equals("")
+                && !(epselenStr = epselenTF.getText()).equals("")) {
+            try {
+                groupCountInt = Integer.valueOf(groupCountStr);
+                epselen = Double.valueOf(epselenStr);
+                if (groupCountInt > components.size()) {
+                    groupCountTF.setText("Enter group number less then features number");
+                    return;
+                }
+                if (epselen < 0) {
+                    epselenTF.setText("Enter correct epselen");
+                    return;
+                }
+                dataObject.extremalGroupingMethod1(workingObjectData, groupCountInt, epselen);
+            } catch (NumberFormatException e) {
+                groupCountTF.setText("Please, enter ONLY INTEGER numbers here");
+                epselenTF.setText("Please, enter ONLY DOUBLE values here");
+            }
+
+            loadDataToTableView(newFactorsTable, dataObject.getNewFactorsObjectsData(), 0);
+            loadDataToTableView(factorsCorelationTable, dataObject.getFactorsCorelationTableModel(), 2);
+
+        } else {
+            epselenTF.setText("Enter correct epselen");
+            groupCountTF.setText("Enter group number less then features number");
+        }
+    }
+
+    public void saveFactorsBtnClicked(Event event) {
+        jFileChooser = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
+        jFileChooser.setFileFilter(filter);
+        jFileChooser.setCurrentDirectory(new File("D:\\"));//2 семестр\\диплом\\Diploma\\"));
+        if (jFileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+            dataObject.saveFactorsObjectData(jFileChooser.getSelectedFile().getAbsoluteFile() + ".txt");
+            newDataTable.setVisible(true);
+            loadDataToTableView(newDataTable, dataObject.getNewObjectsData(), 0);
+        }
+    }
 }
+

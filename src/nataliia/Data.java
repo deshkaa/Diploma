@@ -6,7 +6,6 @@ import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Comparator;
 
 import static java.lang.Math.sqrt;
 
@@ -19,7 +18,6 @@ public class Data {
     private int featureCount;
     private int componentsCount;
     private int groupCount;
-    private double[][] corelationMatrix;
     private ArrayList<ArrayList<Double>> standartizedObjectsData;
     private Eigen eigen;
     private double[] eigenValues;
@@ -28,6 +26,7 @@ public class Data {
     private ArrayList<Double> components_values = new ArrayList<>();
     private ArrayList<double[]> components_vectors = new ArrayList<>();
     private ArrayList<ArrayList<Double>> factors = new ArrayList<>();
+    private ArrayList<ArrayList<Double>> factors_previous = new ArrayList<>();
     private ArrayList<ArrayList<Integer>> partition = new ArrayList<>();
 
     public Data(ArrayList<ArrayList<Double>> objectsData) {
@@ -46,6 +45,10 @@ public class Data {
         return newObjectsData;
     }
 
+    public ArrayList<ArrayList<Double>> getNewFactorsObjectsData() {
+        return getTransposedData(factors);
+    }
+
     public ArrayList<ArrayList<Double>> getStandartizedObjectsData() {
         this.standartizedObjectsData = standartize(objectsData);
         return standartizedObjectsData;
@@ -57,8 +60,8 @@ public class Data {
     }
 
     public Eigen getEigen() {
-        this.corelationMatrix = calculateCorrelationMatrix(featuresData, featureCount, objectCount);
-        this.eigen = new Eigen(this.corelationMatrix);
+        double[][] corelationMatrix = calculateCorrelationMatrix(featuresData, featureCount, objectCount);
+        this.eigen = new Eigen(corelationMatrix);
         this.eigenValues = eigen.getValues();
         this.eigenVectors = eigen.getVectors();
 
@@ -126,7 +129,7 @@ public class Data {
     public static ArrayList<ArrayList<Double>> standartize(ArrayList<ArrayList<Double>> objectsData, int a, int b) {
         ArrayList<ArrayList<Double>> featuresData = getTransposedData(objectsData);
         ArrayList<ArrayList<Double>> newDataFeatures = new ArrayList<>();
-        double dif = Math.abs(b-a);
+        double dif = Math.abs(b - a);
         for (ArrayList<Double> list : featuresData) {
             double min, max;
             min = max = list.get(0);
@@ -181,12 +184,16 @@ public class Data {
         return result;
     }
 
-    public ArrayList<ArrayList<Double>> getCorelationTableModel() {
+    public ArrayList<ArrayList<Double>> getComponentsCorelationTableModel() {
         this.newComponentsData = getTransposedData(newObjectsData);
         return doubleArrayToDoubleList(calculateCorrelationMatrix(featuresData, newComponentsData, featureCount, componentsCount, objectCount));
     }
 
-    public void saveSelectedComponentsObjectData(String filePath) {
+    public ArrayList<ArrayList<Double>> getFactorsCorelationTableModel() {
+        return doubleArrayToDoubleList(calculateCorrelationMatrix(featuresData, factors, featureCount, factors.size(), objectCount));
+    }
+
+    public void saveSelectedComponentsObjectData(ArrayList<ArrayList<Double>> workingObjectData, String filePath) {
         this.newObjectsData = new ArrayList<>();
         ArrayList<String> writeToFile = new ArrayList<>();
         for (int i = 0; i < objectCount; i++) {
@@ -195,10 +202,10 @@ public class Data {
             for (int j = 0; j < componentsCount; j++) {
                 double sum = 0;
                 for (int k = 0; k < featureCount; k++) {
-                    sum += objectsData.get(i).get(k) * components_vectors.get(j)[k];
+                    sum += workingObjectData.get(i).get(k) * components_vectors.get(j)[k];
                 }
                 object.add(sum);
-                NumberFormat formatter = new DecimalFormat("#.00");
+                NumberFormat formatter = new DecimalFormat("#.##");
                 string.append(formatter.format(sum) + " ");
             }
             newObjectsData.add(object);
@@ -207,39 +214,71 @@ public class Data {
         writeToFile(filePath, writeToFile);
     }
 
-    public void extremalGroupingMethod1(int groupCount) {
+    public void saveFactorsObjectData(String filePath) {
+        ArrayList<ArrayList<Double>> factorsObjectData = getTransposedData(factors);
+        ArrayList<String> writeToFile = new ArrayList<>();
+        for (int i = 0; i < objectCount; i++) {
+            StringBuilder string = new StringBuilder();
+            for (int j = 0; j < factors.size(); j++) {
+                NumberFormat formatter = new DecimalFormat("#.##");
+                string.append(formatter.format(factorsObjectData.get(i).get(j)) + " ");
+            }
+            writeToFile.add(string.toString());
+        }
+        writeToFile(filePath, writeToFile);
+    }
+
+    public void extremalGroupingMethod1(ArrayList<ArrayList<Double>> workingObjectData, int groupCount, double epselen) {
+        this.groupCount = groupCount;
+        ArrayList<ArrayList<Double>> workingFeatureData = getTransposedData(workingObjectData);
+
         factors.clear();
         partition.clear();
 
         for (int i = 0; i < groupCount; i++) {
-            factors.add(featuresData.get(i));
+            factors.add(newComponentsData.get(i));
             partition.add(new ArrayList<>());
         }
 
-        while (true) {              /////  ???????? условие выхода из цикла
+        do {
             calculatePartition();
-            calculateFactors();
+            calculateFactors(workingFeatureData);
         }
+        while (distanceBetweenFactors(factors_previous, factors, epselen));
     }
 
-    //не проверено
-    private void calculateFactors() {
+    private boolean distanceBetweenFactors(
+            ArrayList<ArrayList<Double>> factors_previous,
+            ArrayList<ArrayList<Double>> factors, double epselen) {
+        for (int i = 0; i < factors.size(); i++) {
+            for (int j = 0; j < factors.get(i).size(); j++) {
+                double distance = Math.abs(factors.get(i).get(j)) - Math.abs(factors_previous.get(i).get(j));
+                if (distance > epselen)
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    private void calculateFactors(ArrayList<ArrayList<Double>> workingFeatureData) {
+        factors_previous = factors;
+        factors.clear();
         for (int l = 0; l < groupCount; l++) {
-            factors.clear();
             double denumerator = 0;
-            //корреляция в каждой группе
-            partition.get(l).sort(Comparator.naturalOrder());
+
+            //corelation in each group
+            //partition.get(l).sort(Comparator.naturalOrder());
             ArrayList<Integer> tmp = partition.get(l);
             int tmp_size = tmp.size();
             ArrayList<ArrayList<Double>> tmp_feature_list = new ArrayList<>();
             for (int i : tmp) {
-                tmp_feature_list.add(featuresData.get(i));
+                tmp_feature_list.add(workingFeatureData.get(i));
             }
             double[][] correlationMatrixL = calculateCorrelationMatrix(tmp_feature_list, tmp_size, objectCount);
             double[] maxEigenVectorL = (new Eigen(correlationMatrixL).getVectors()[0]);
             for (int i = 0; i < tmp_size; i++) {
                 for (int j = i; j < tmp_size; j++) {
-                    denumerator += maxEigenVectorL[i] * maxEigenVectorL[j] * corelation(featuresData.get(tmp.get(i)), featuresData.get(tmp.get(j)));
+                    denumerator += maxEigenVectorL[i] * maxEigenVectorL[j] * corelation(workingFeatureData.get(tmp.get(i)), workingFeatureData.get(tmp.get(j)));
                 }
             }
             denumerator = Math.sqrt(denumerator);
@@ -249,7 +288,7 @@ public class Data {
                 double numerator = 0;
                 for (int i = 0; i < tmp_size; i++) {
                     numerator += maxEigenVectorL[i] *
-                            featuresData.get(tmp.get(i)).get(k);    //  ?????????????????
+                            featuresData.get(tmp.get(i)).get(k);
                 }
 
                 factor.add(numerator / denumerator);
@@ -258,19 +297,18 @@ public class Data {
         }
     }
 
-    //не проверено
     private void calculatePartition() {
-        //все очистить
+        //clear all
         for (ArrayList<Integer> part : partition) {
             part.clear();
         }
         for (int i = 0; i < featureCount; i++) {
-            double cor_0 = Math.pow(corelation(featuresData.get(i), factors.get(0)), 2.);
+            double max = Math.pow(corelation(featuresData.get(i), factors.get(0)), 2.);
             int index = 0;
-            for (int q = 1; q < groupCount; q++) {
+            for (int q = i; q < groupCount; q++) {
                 double cor_q = Math.pow(corelation(featuresData.get(i), factors.get(q)), 2.);
-                if (cor_q > cor_0) {
-                    cor_0 = cor_q;
+                if (cor_q > max) {
+                    max = cor_q;
                     index = q;
                 }
             }
@@ -278,10 +316,9 @@ public class Data {
         }
     }
 
-    //не проверено
     private double corelation(ArrayList<Double> x, ArrayList<Double> f) {
         double numerator = 0;
-        double denumerator = 1;
+        double denumerator;
         double denumeratorI = 0;
         double denumeratorJ = 0;
         double midValueI = middleValue(x);
@@ -413,5 +450,4 @@ public class Data {
         }
         return result;
     }
-
 }
