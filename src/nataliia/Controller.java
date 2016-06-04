@@ -57,6 +57,7 @@ public class Controller {
     public AnchorPane anchorPaneTab1;
     public Tab principalComponentsMethodTab;
     public AnchorPane anchorPaneTab2;
+    public Button startExtremalGrouping2Btn;
 
     JFileChooser jFileChooser;
     FileChooser fileChooser;
@@ -76,7 +77,6 @@ public class Controller {
     @FXML
     private void initialize() {
         standartizedPane.setDisable(true);
-//        anchorPaneTab2.setVisible(false);
     }
 
     public void openButtonClick(ActionEvent actionEvent) throws FileNotFoundException {
@@ -122,6 +122,11 @@ public class Controller {
             componentsCountRB.setToggleGroup(groupCryteria);
             radiobuttonsCtyteriaAdded = true;
         }
+
+        ///////////////
+
+        loadDataToTableView(corelationTable,dataObject.getComponentsCorelationTableModel(workingObjectData),2);
+        corelationTable.setVisible(true);
     }
 
     private void chartSetting(LineChart<Number, Number> chart, NumberAxis xAxis, NumberAxis yAxis, String xLabel,
@@ -180,15 +185,15 @@ public class Controller {
         jFileChooser = new JFileChooser();
         FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
         jFileChooser.setFileFilter(filter);
-        jFileChooser.setCurrentDirectory(new File("D:"));//\\2 семестр\\диплом\\Diploma\\"));
+        //jFileChooser.setCurrentDirectory(new File("D:"));//\\2 семестр\\диплом\\Diploma\\"));
         if (jFileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
             dataObject.saveSelectedComponentsObjectData(workingObjectData, jFileChooser.getSelectedFile().getAbsoluteFile() + ".txt");
             newDataTable.setVisible(true);
             loadDataToTableView(newDataTable, dataObject.getNewObjectsData(), 0);
         }
 
-        corelationTable.setVisible(true);
-        loadDataToTableView(corelationTable, dataObject.getComponentsCorelationTableModel(), 2);
+        //corelationTable.setVisible(true);
+        //loadDataToTableView(corelationTable, dataObject.getComponentsCorelationTableModel(), 2);
 
         extremalGroupingMethodTab.setDisable(false);
     }
@@ -367,12 +372,16 @@ public class Controller {
         jFileChooser = new JFileChooser();
         FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
         jFileChooser.setFileFilter(filter);
-        jFileChooser.setCurrentDirectory(new File("D:\\"));//2 семестр\\диплом\\Diploma\\"));
+        //jFileChooser.setCurrentDirectory(new File("D:\\"));//2 семестр\\диплом\\Diploma\\"));
         if (jFileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
             dataObject.saveFactorsObjectData(jFileChooser.getSelectedFile().getAbsoluteFile() + ".txt");
             newDataTable.setVisible(true);
             loadDataToTableView(newDataTable, dataObject.getNewObjectsData(), 0);
         }
+    }
+
+    public void startExtremalGroupingBtnClicked(Event event) {
+        
     }
 }
 

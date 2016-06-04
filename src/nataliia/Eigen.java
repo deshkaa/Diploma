@@ -14,7 +14,13 @@ public class Eigen {
         Matrix matrix = new Matrix(corelMatrix);
         EigenvalueDecomposition eigDec = matrix.eig();
         values = eigDec.getRealEigenvalues();
-        vectors = eigDec.getV().getArray();
+        double [][] tmp = eigDec.getV().getArray();
+        int size = tmp.length;
+        vectors = new double[size][size];
+        for (int i=0;i<size;i++)
+            for (int j=0;j<size;j++){
+                vectors[j][i]=tmp[i][j];
+            }
 
         sort(values,vectors);
     }

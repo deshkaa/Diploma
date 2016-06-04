@@ -60,13 +60,14 @@
                         <TextField fx:id="groupCountTF" layoutX="126.0" layoutY="14.0" prefWidth="56.0" text="2" />
                         <TextField fx:id="epselenTF" layoutX="289.0" layoutY="14.0" prefWidth="56.000099999997474" text="0.01" />
                         <Label layoutX="226.0" layoutY="17.0" text="Epselen" />
-                        <Button fx:id="startExtremalGroupingBtn" layoutX="14.0" layoutY="54.0" mnemonicParsing="false" onMouseClicked="#startExtremalGroupingClicked" prefHeight="32.0" prefWidth="331.0" text="Start extremal grouping" />
+                        <Button fx:id="startExtremalGroupingBtn" layoutX="14.0" layoutY="54.0" mnemonicParsing="false" onMouseClicked="#startExtremalGroupingClicked" prefHeight="32.0" prefWidth="164.0" text="Start extremal grouping 1" />
+                        <Button fx:id="startExtremalGrouping2Btn" layoutX="186.0" layoutY="54.0" mnemonicParsing="false" onMouseClicked="#startExtremalGroupingBtnClicked" prefHeight="32.0000084472631" prefWidth="160.0" text="Start extremal grouping 2" />
                       </children>
                     </Pane>
                     <TableView fx:id="factorsCorelationTable" layoutX="28.0" layoutY="137.0" prefHeight="405.0" prefWidth="338.0000999999975" />
                     <TableView fx:id="newFactorsTable" layoutX="417.0" layoutY="39.0" prefHeight="504.0" prefWidth="190.0" />
-                    <Label layoutX="28.0" layoutY="109.0" text="Corelation between initial features and principal components" />
-                    <Label layoutX="432.0" layoutY="18.0" text="Data form factors" />
+                    <Label layoutX="28.0" layoutY="109.0" text="Corelation between initial features and factors" />
+                    <Label layoutX="432.0" layoutY="18.0" text="Data from factors" />
                     <Button fx:id="saveFactorsBtn" layoutX="417.0" layoutY="555.0" mnemonicParsing="false" onMouseClicked="#saveFactorsBtnClicked" prefHeight="32.0" prefWidth="190.0" text="Save factors" />
                   </children>
                 </Pane>
