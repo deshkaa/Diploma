@@ -3,6 +3,11 @@ package nataliia;
 import Jama.EigenvalueDecomposition;
 import Jama.Matrix;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class Eigen {
 
     private double[][] matrix;
@@ -14,18 +19,18 @@ public class Eigen {
         Matrix matrix = new Matrix(corelMatrix);
         EigenvalueDecomposition eigDec = matrix.eig();
         values = eigDec.getRealEigenvalues();
-        double [][] tmp = eigDec.getV().getArray();
+        double[][] tmp = eigDec.getV().getArray();
         int size = tmp.length;
         vectors = new double[size][size];
-        for (int i=0;i<size;i++)
-            for (int j=0;j<size;j++){
-                vectors[j][i]=tmp[i][j];
+        for (int i = 0; i < size; i++)
+            for (int j = 0; j < size; j++) {
+                vectors[j][i] = tmp[i][j];
             }
 
-        sort(values,vectors);
+        sort(values, vectors);
     }
 
-    private void sort(double[] x, double[][] y){
+    private void sort(double[] x, double[][] y) {
         for (int i = 0; i < x.length - 1; i++) {
             boolean swapped = false;
             for (int j = 0; j < x.length - i - 1; j++) {
@@ -42,7 +47,7 @@ public class Eigen {
                 }
             }
 
-            if(!swapped)
+            if (!swapped)
                 break;
         }
     }

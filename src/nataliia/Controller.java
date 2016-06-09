@@ -58,6 +58,7 @@ public class Controller {
     public Tab principalComponentsMethodTab;
     public AnchorPane anchorPaneTab2;
     public Button startExtremalGrouping2Btn;
+    public TableView featuresCorelationTable;
 
     JFileChooser jFileChooser;
     FileChooser fileChooser;
@@ -73,6 +74,7 @@ public class Controller {
     //private ArrayList<ArrayList<Double>> workingFeatureData;
     private Eigen eigen;
     private ArrayList<Double> components = new ArrayList<>();
+    private int componentsCount;
 
     @FXML
     private void initialize() {
@@ -80,8 +82,9 @@ public class Controller {
     }
 
     public void openButtonClick(ActionEvent actionEvent) throws FileNotFoundException {
+        standartizeCB.setSelected(false);
         fileChooser = new FileChooser();
-        fileChooser.setInitialDirectory(new File("D:\\2 семестр\\диплом\\Diploma\\"));
+        //fileChooser.setInitialDirectory(new File("D:\\2 семестр\\диплом\\Diploma\\"));
         fileChooser.setTitle("Open file with objectsData:");
         ArrayList<ArrayList<Double>> readFile = Functions.readFile(fileChooser.showOpenDialog(openButton.getScene().getWindow()));
         if (readFile == null)
@@ -91,10 +94,12 @@ public class Controller {
         methodsTabPane.setDisable(false);
         standartizedPane.setDisable(false);
         loadDataToTableView(dataTable, dataObject.getObjectsData(), 0);
+        loadDataToTableView(featuresCorelationTable,dataObject.getFeaturesCorelation(),2);
     }
 
     public void calculateBtnClick(ActionEvent actionEvent) {
         eigen = dataObject.getEigen();
+        chart.getData().clear();
 
         eigenValuesTable.setVisible(true);
         newDataTable.setVisible(true);
@@ -108,7 +113,7 @@ public class Controller {
                 yAxis,
                 "Number of Principal Component",
                 "Value",
-                "Principal Components",
+                "EigenValues",
                 "Series1",
                 dataObject.getEigen().getValues());
 
@@ -123,10 +128,12 @@ public class Controller {
             radiobuttonsCtyteriaAdded = true;
         }
 
-        ///////////////
-
         loadDataToTableView(corelationTable,dataObject.getComponentsCorelationTableModel(workingObjectData),2);
         corelationTable.setVisible(true);
+
+        componentsCount = dataObject.getNewComponentsCount();
+
+        extremalGroupingMethodTab.setDisable(false);
     }
 
     private void chartSetting(LineChart<Number, Number> chart, NumberAxis xAxis, NumberAxis yAxis, String xLabel,
@@ -194,8 +201,6 @@ public class Controller {
 
         //corelationTable.setVisible(true);
         //loadDataToTableView(corelationTable, dataObject.getComponentsCorelationTableModel(), 2);
-
-        extremalGroupingMethodTab.setDisable(false);
     }
 
     public void standatizationClicked(Event event) {
@@ -289,7 +294,7 @@ public class Controller {
                     tableColumn.setPrefWidth(40);
                 } else {
                     tableColumn = new TableColumn(i + "");
-                    tableColumn.setPrefWidth(70);
+                    tableColumn.setPrefWidth(50);
                 }
                 final int columnNumber = i;
                 tableColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<String[], String>, ObservableValue<String>>() {
@@ -308,18 +313,17 @@ public class Controller {
                                     super.updateItem(item, empty);
                                     if (!isEmpty()) {
                                         this.setTextFill(Color.RED);
-                                        // Get fancy and change color based on data
                                         try {
                                             item = item.replace(',', '.');
-                                            double tmp = Double.valueOf(item);
-                                            if (tmp < -0.5)
-                                                this.setTextFill(Color.YELLOWGREEN);
-                                            else if (tmp > -0.5 && tmp < 0)
-                                                this.setTextFill(Color.YELLOW);
-                                            else if (tmp > 0 && tmp < 0.5)
-                                                this.setTextFill(Color.ORANGE);
-                                            else if (tmp > 0.5 && tmp < 1)
-                                                this.setTextFill(Color.RED);
+                                            double tmp = Math.abs(Double.valueOf(item));
+                                            if (tmp < 0.25)
+                                                this.setTextFill(Color.LIGHTGREY);
+                                            else if (tmp >= 0.25 && tmp < 0.5)
+                                                this.setTextFill(Color.GRAY);
+                                            else if (tmp >= 0.5 && tmp < 0.7)
+                                                this.setTextFill(Color.BLACK);
+                                            else if (tmp >= 0.7 && tmp <= 1)
+                                                this.setTextFill(Color.BLACK);
                                         } catch (Exception e) {
                                         } finally {
                                             setText(item);
@@ -337,6 +341,10 @@ public class Controller {
     }
 
     public void startExtremalGroupingClicked(Event event) {
+        epselenTF.setText("0.001");
+        newFactorsTable.getColumns().clear();
+        factorsCorelationTable.getColumns().clear();
+
         String groupCountStr, epselenStr;
         int groupCountInt;
         double epselen;
@@ -345,7 +353,7 @@ public class Controller {
             try {
                 groupCountInt = Integer.valueOf(groupCountStr);
                 epselen = Double.valueOf(epselenStr);
-                if (groupCountInt > components.size()) {
+                if (groupCountInt > componentsCount) {
                     groupCountTF.setText("Enter group number less then features number");
                     return;
                 }
@@ -382,6 +390,17 @@ public class Controller {
 
     public void startExtremalGroupingBtnClicked(Event event) {
         
+    }
+
+    public void tabPaneClicked(Event event) {
+        if (extremalGroupingMethodTab.isSelected()==true){
+            standartizeCB.setSelected(true);
+            this.standatizationClicked(new Event(null));
+            calculateBtnClick(new ActionEvent());
+
+            standartizeCB.setDisable(true);}
+        else
+            standartizeCB.setDisable(false);
     }
 }
 

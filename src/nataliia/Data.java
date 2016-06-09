@@ -13,11 +13,12 @@ public class Data {
     private ArrayList<ArrayList<Double>> objectsData;
     private ArrayList<ArrayList<Double>> featuresData;
     private ArrayList<ArrayList<Double>> newObjectsData;
-    private ArrayList<ArrayList<Double>> newComponentsData;
+    //private ArrayList<ArrayList<Double>> newComponentsData;
     private int objectCount;
     private int featureCount;
     private int componentsCount;
     private int groupCount;
+    private int factorCount;
     private ArrayList<ArrayList<Double>> standartizedObjectsData;
     private Eigen eigen;
     private double[] eigenValues;
@@ -30,6 +31,7 @@ public class Data {
     private ArrayList<ArrayList<Double>> factors = new ArrayList<>();
     private ArrayList<ArrayList<Double>> factors_previous = new ArrayList<>();
     private ArrayList<ArrayList<Integer>> partition = new ArrayList<>();
+    //private Object newComponentsCount;
 
     public Data(ArrayList<ArrayList<Double>> objectsData) {
         this.objectsData = objectsData;
@@ -41,6 +43,11 @@ public class Data {
 
     public ArrayList<ArrayList<Double>> getObjectsData() {
         return objectsData;
+    }
+
+    public ArrayList<ArrayList<Double>> getFeaturesCorelation(){
+        double[][] result_array = calculateCorrelationMatrix(featuresData,featureCount,objectCount);
+        return doubleArrayToDoubleList(result_array);
     }
 
     public ArrayList<ArrayList<Double>> getNewObjectsData() {
@@ -170,7 +177,6 @@ public class Data {
             percents.add(percent);
             eigValuesSumAccumulated += percent;
             percentSum.add(eigValuesSumAccumulated);
-            //titles.add();
         }
         result.add(percents);
         result.add(percentSum);
@@ -187,10 +193,7 @@ public class Data {
     }
 
     public ArrayList<ArrayList<Double>> getComponentsCorelationTableModel(ArrayList<ArrayList<Double>> workingObjectData) {
-        //this.newComponentsData = getTransposedData(newObjectsData);
-        //return doubleArrayToDoubleList(calculateCorrelationMatrix(featuresData, newComponentsData, featureCount, componentsCount, objectCount));
-
-//generate all data from all components
+    //generate all data from all components
         this.new_all_objects = new ArrayList<>();
         ArrayList<ArrayList<Double>> workingFeatureData = getTransposedData(workingObjectData);
         int size = eigenVectors.length;
@@ -210,19 +213,12 @@ public class Data {
         double[][] new_correlation = new double[featureCount][size];
         for (int h = 0; h < featureCount; h++)
             for (int j = 0; j < size; j++) {
-                double sq_mid1=middleSquareValue(new_all_components.get(j), middleValue(new_all_components.get(j)));
-                double mid1 = middleValue(new_all_components.get(j));
-
-                double sq_mid2=middleSquareValue(workingFeatureData.get(h), middleValue(workingFeatureData.get(h)));
-                double mid2 = middleValue(workingFeatureData.get(h));
-                new_correlation[h][j] = //Math.sqrt(eigenValues[j])
+                new_correlation[h][j] =
                         middleSquareValue(new_all_components.get(j), middleValue(new_all_components.get(j))) /
                                 middleSquareValue(workingFeatureData.get(h), middleValue(workingFeatureData.get(h)))
                                 * eigenVectors[j][h];
             }
-        return doubleArrayToDoubleList(//calculateCorrelationMatrix(getTransposedData(workingObjectData), new_all_components, featureCount, size, objectCount)
-                new_correlation
-        );
+        return doubleArrayToDoubleList(new_correlation);
     }
 
     public ArrayList<ArrayList<Double>> getFactorsCorelationTableModel() {
@@ -265,23 +261,24 @@ public class Data {
     }
 
     public void extremalGroupingMethod1(ArrayList<ArrayList<Double>> workingObjectData, int groupCount, double epselen) {
-        this.groupCount = groupCount;
+        this.groupCount = this.factorCount = groupCount;
         ArrayList<ArrayList<Double>> workingFeatureData = getTransposedData(workingObjectData);
 
         factors.clear();
         partition.clear();
 
         for (int i = 0; i < groupCount; i++) {
-            //factors.add(newComponentsData.get(i));
             factors.add(new_all_components.get(i));
             partition.add(new ArrayList<>());
         }
 
+        int count = 0;
         do {
             calculatePartition1();
             calculateFactors1(workingFeatureData);
+            count++;
         }
-        while (distanceBetweenFactors(factors_previous, factors, epselen));
+        while (count<10);//distanceBetweenFactors(factors_previous, factors, epselen));
     }
 
     public void extremalGroupingMethod2(ArrayList<ArrayList<Double>> workingObjectData, int groupCount, double epselen) {
@@ -292,7 +289,7 @@ public class Data {
         partition.clear();
 
         for (int i = 0; i < groupCount; i++) {
-            factors.add(newComponentsData.get(i));
+            //factors.add(newComponentsData.get(i));
             partition.add(new ArrayList<>());
         }
 
@@ -317,21 +314,27 @@ public class Data {
     }
 
     private void calculateFactors1(ArrayList<ArrayList<Double>> workingFeatureData) {
+
         factors_previous = factors;
         factors.clear();
-        for (int l = 0; l < groupCount; l++) {
+
+        for (int l = 0; l < factorCount; l++) {
             double denumerator = 0;
 
             //corelation in each group
             //partition.get(l).sort(Comparator.naturalOrder());
             ArrayList<Integer> tmp = partition.get(l);
             int tmp_size = tmp.size();
+            if (tmp_size == 0) {
+                continue;
+            }
             ArrayList<ArrayList<Double>> tmp_feature_list = new ArrayList<>();
             for (int i : tmp) {
                 tmp_feature_list.add(workingFeatureData.get(i));
             }
             double[][] correlationMatrixL = calculateCorrelationMatrix(tmp_feature_list, tmp_size, objectCount);
-            double[] maxEigenVectorL = (new Eigen(correlationMatrixL).getVectors()[0]);
+            Eigen c = new Eigen(correlationMatrixL);
+            double[] maxEigenVectorL = (c.getVectors()[0]);
             for (int i = 0; i < tmp_size; i++) {
                 for (int j = i; j < tmp_size; j++) {
                     denumerator += maxEigenVectorL[i] * maxEigenVectorL[j] * corelation(workingFeatureData.get(tmp.get(i)), workingFeatureData.get(tmp.get(j)));
@@ -351,17 +354,18 @@ public class Data {
             }
             factors.add(factor);
         }
+        factorCount = factors.size();
     }
 
     private void calculatePartition1() {
-        //clear all
         for (ArrayList<Integer> part : partition) {
             part.clear();
         }
         for (int i = 0; i < featureCount; i++) {
             double max = Math.pow(corelation(featuresData.get(i), factors.get(0)), 2.);
             int index = 0;
-            for (int q = i; q < groupCount; q++) {
+            factorCount = factors.size();
+            for (int q = i; q < factorCount; q++) {
                 double cor_q = Math.pow(corelation(featuresData.get(i), factors.get(q)), 2.);
                 if (cor_q > max) {
                     max = cor_q;
@@ -561,5 +565,9 @@ public class Data {
             result.add(list);
         }
         return result;
+    }
+
+    public int getNewComponentsCount() {
+        return new_all_components.size();
     }
 }
