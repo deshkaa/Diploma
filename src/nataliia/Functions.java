@@ -2,15 +2,17 @@ package nataliia;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class Functions {
+class Functions {
 
-    public static ArrayList<ArrayList<Double>> readFile(File file)
+    static ArrayList<ArrayList<Double>> readFile(File file)
             throws FileNotFoundException {
         ArrayList<ArrayList<Double>> data = new ArrayList<>();
 
@@ -37,7 +39,7 @@ public class Functions {
         return data;
     }
 
-    public static List<String[]> listToStringArray(
+    static List<String[]> listToStringArray(
             ArrayList<ArrayList<Double>> objectsData, int parametr) {
         List<String[]> result = new ArrayList<>(objectsData.size());
         for (int i = 0; i < objectsData.size(); i++) {
@@ -61,6 +63,43 @@ public class Functions {
             result.get(3)[0] = "vect";
         }
 
+        return result;
+    }
+
+    static ArrayList<Double> arrayAsList(double[] values) {
+        ArrayList<Double> result = new ArrayList<>();
+        for (double value : values) {
+            result.add(value);
+        }
+        return result;
+    }
+
+    static void writeToFile(String filePath, ArrayList<String> writeToFile) {
+        File file = new File(filePath);
+        try {
+            if (!file.exists()) file.createNewFile();
+            PrintWriter out = new PrintWriter(file.getAbsoluteFile());
+            try {
+                for (String string : writeToFile) {
+                    out.println(string);
+                }
+            } finally {
+                out.close();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    static ArrayList<ArrayList<Double>> doubleArrayToDoubleList(double[][] data) {
+        ArrayList<ArrayList<Double>> result = new ArrayList<>();
+        for (double[] array : data) {
+            ArrayList<Double> list = new ArrayList<>();
+            for (double element : array) {
+                list.add(element);
+            }
+            result.add(list);
+        }
         return result;
     }
 }

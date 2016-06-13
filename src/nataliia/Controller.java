@@ -22,7 +22,6 @@ import javafx.util.Callback;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,51 +29,33 @@ import java.util.List;
 public class Controller {
 
     public Button calculateBtn;
-    public TableView<String[]> dataTable;
-    public TableView<String[]> newDataTable;
-    public TableView<String[]> eigenValuesTable;
-    public TableView<String[]> corelationTable;
-    public TextField dispMinValueTF, dispPercentSumTF, componentsCountTF;
-    public TextField intervalStartTF, intervalEndTF;
+    public TableView<String[]> dataTable, newDataTable, eigenValuesTable, corelationTable;
+    public TextField dispMinValueTF, dispPercentSumTF, componentsCountTF,
+            intervalStartTF, intervalEndTF,
+            epselenTF, groupCountTF;
     public CheckBox standartizeCB;
     public RadioButton middleStandartRB, intervalStandartRB;
-    public Pane cryteriaPane;
+    public Pane standartizedPane, cryteriaPane;
     public RadioButton dispMinValueRB, dispPercentSumRB, componentsCountRB;
     public TabPane methodsTabPane;
-    public Pane standartizedPane;
-    public Button selectBtn;
-    public Button openButton;
+    public Tab principalComponentsMethodTab, extremalGroupingMethodTab;
+    public Button selectBtn, openButton, startExtremalGroupingBtn, saveFactorsBtn,
+            startExtremalGrouping2Btn;
     public LineChart<Number, Number> chart;
-    public NumberAxis yAxis;
-    public NumberAxis xAxis;
-    public TextField epselenTF;
-    public TextField groupCountTF;
-    public Button startExtremalGroupingBtn;
-    public Tab extremalGroupingMethodTab;
-    public TableView newFactorsTable;
-    public TableView factorsCorelationTable;
-    public Button saveFactorsBtn;
-    public AnchorPane anchorPaneTab1;
-    public Tab principalComponentsMethodTab;
-    public AnchorPane anchorPaneTab2;
-    public Button startExtremalGrouping2Btn;
-    public TableView featuresCorelationTable;
-
-    JFileChooser jFileChooser;
-    FileChooser fileChooser;
+    public NumberAxis yAxis, xAxis;
+    public TableView newFactorsTable, factorsCorelationTable, featuresCorelationTable;
+    public AnchorPane anchorPaneTab1, anchorPaneTab2;
 
     private final ToggleGroup groupStandart = new ToggleGroup();
     private final ToggleGroup groupCryteria = new ToggleGroup();
-
     private boolean radiobuttonsStandartAdded = false;
     private boolean radiobuttonsCtyteriaAdded = false;
 
+    private JFileChooser jFileChooser;
+
     private Data dataObject;
-    private ArrayList<ArrayList<Double>> workingObjectData;
-    //private ArrayList<ArrayList<Double>> workingFeatureData;
-    private Eigen eigen;
-    private ArrayList<Double> components = new ArrayList<>();
     private int componentsCount;
+    private ArrayList<ArrayList<Double>> workingObjectData;
 
     @FXML
     private void initialize() {
@@ -83,7 +64,7 @@ public class Controller {
 
     public void openButtonClick(ActionEvent actionEvent) throws FileNotFoundException {
         standartizeCB.setSelected(false);
-        fileChooser = new FileChooser();
+        FileChooser fileChooser = new FileChooser();
         //fileChooser.setInitialDirectory(new File("D:\\2 семестр\\диплом\\Diploma\\"));
         fileChooser.setTitle("Open file with objectsData:");
         ArrayList<ArrayList<Double>> readFile = Functions.readFile(fileChooser.showOpenDialog(openButton.getScene().getWindow()));
@@ -94,11 +75,11 @@ public class Controller {
         methodsTabPane.setDisable(false);
         standartizedPane.setDisable(false);
         loadDataToTableView(dataTable, dataObject.getObjectsData(), 0);
-        loadDataToTableView(featuresCorelationTable,dataObject.getFeaturesCorelation(),2);
+        loadDataToTableView(featuresCorelationTable, dataObject.getFeaturesCorelation(), 2);
     }
 
     public void calculateBtnClick(ActionEvent actionEvent) {
-        eigen = dataObject.getEigen();
+        Eigen eigen = dataObject.getEigen();
         chart.getData().clear();
 
         eigenValuesTable.setVisible(true);
@@ -128,7 +109,7 @@ public class Controller {
             radiobuttonsCtyteriaAdded = true;
         }
 
-        loadDataToTableView(corelationTable,dataObject.getComponentsCorelationTableModel(workingObjectData),2);
+        loadDataToTableView(corelationTable, dataObject.getComponentsCorelationTableModel(workingObjectData), 2);
         corelationTable.setVisible(true);
 
         componentsCount = dataObject.getNewComponentsCount();
@@ -136,7 +117,8 @@ public class Controller {
         extremalGroupingMethodTab.setDisable(false);
     }
 
-    private void chartSetting(LineChart<Number, Number> chart, NumberAxis xAxis, NumberAxis yAxis, String xLabel,
+    private void chartSetting(LineChart<Number, Number> chart,
+                              NumberAxis xAxis, NumberAxis yAxis, String xLabel,
                               String yLabel, String title, String seriesName, double[] data) {
         xAxis.setLabel(xLabel);
         yAxis.setLabel(yLabel);
@@ -155,6 +137,7 @@ public class Controller {
 
     public void selectBtnClicked(Event event) {
         //// по пороговому значению главных компонент
+        ArrayList<Double> components = new ArrayList<>();
         if (dispMinValueRB.isSelected()) {
             if (!dispMinValueTF.getText().equals("")) {
                 double dispMinValue;
@@ -294,7 +277,7 @@ public class Controller {
                     tableColumn.setPrefWidth(40);
                 } else {
                     tableColumn = new TableColumn(i + "");
-                    tableColumn.setPrefWidth(50);
+                    tableColumn.setPrefWidth(40);
                 }
                 final int columnNumber = i;
                 tableColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<String[], String>, ObservableValue<String>>() {
@@ -361,7 +344,7 @@ public class Controller {
                     epselenTF.setText("Enter correct epselen");
                     return;
                 }
-                dataObject.extremalGroupingMethod1(workingObjectData, groupCountInt, epselen);
+                dataObject.extremalGroupingMethod(workingObjectData, groupCountInt, epselen);
             } catch (NumberFormatException e) {
                 groupCountTF.setText("Please, enter ONLY INTEGER numbers here");
                 epselenTF.setText("Please, enter ONLY DOUBLE values here");
@@ -388,18 +371,14 @@ public class Controller {
         }
     }
 
-    public void startExtremalGroupingBtnClicked(Event event) {
-        
-    }
-
     public void tabPaneClicked(Event event) {
-        if (extremalGroupingMethodTab.isSelected()==true){
+        if (extremalGroupingMethodTab.isSelected() == true) {
             standartizeCB.setSelected(true);
             this.standatizationClicked(new Event(null));
             calculateBtnClick(new ActionEvent());
 
-            standartizeCB.setDisable(true);}
-        else
+            standartizeCB.setDisable(true);
+        } else
             standartizeCB.setDisable(false);
     }
 }

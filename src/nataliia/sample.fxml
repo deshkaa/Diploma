@@ -11,7 +11,7 @@
   <children>
     <Button fx:id="openButton" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#openButtonClick" prefHeight="31.0" prefWidth="241.0" text="Open file" />
     <TableView fx:id="dataTable" disable="false" layoutX="14.0" layoutY="69.0" prefHeight="225.0" prefWidth="241.0" visible="true" />
-    <TabPane fx:id="methodsTabPane" disable="false" layoutX="269.0" layoutY="0.0" prefHeight="686.0" prefWidth="631.0" tabClosingPolicy="UNAVAILABLE" visible="true" onMouseClicked="#tabPaneClicked">
+    <TabPane fx:id="methodsTabPane" disable="false" layoutX="269.0" layoutY="0.0" onMouseClicked="#tabPaneClicked" prefHeight="686.0" prefWidth="631.0" tabClosingPolicy="UNAVAILABLE" visible="true">
       <tabs>
         <Tab fx:id="principalComponentsMethodTab" text="Principal components method">
           <content>
@@ -60,8 +60,8 @@
                         <TextField fx:id="groupCountTF" layoutX="126.0" layoutY="14.0" prefWidth="56.0" text="2" />
                         <TextField fx:id="epselenTF" layoutX="289.0" layoutY="14.0" prefWidth="56.000099999997474" text="0.01" />
                         <Label layoutX="226.0" layoutY="17.0" text="Epselen" />
-                        <Button fx:id="startExtremalGroupingBtn" layoutX="14.0" layoutY="54.0" mnemonicParsing="false" onMouseClicked="#startExtremalGroupingClicked" prefHeight="32.0" prefWidth="164.0" text="Start extremal grouping 1" />
-                        <Button fx:id="startExtremalGrouping2Btn" layoutX="186.0" layoutY="54.0" mnemonicParsing="false" onMouseClicked="#startExtremalGroupingBtnClicked" prefHeight="32.0000084472631" prefWidth="160.0" text="Start extremal grouping 2" />
+                        <Button fx:id="startExtremalGroupingBtn" layoutX="14.0" layoutY="54.0" mnemonicParsing="false" onMouseClicked="#startExtremalGroupingClicked" prefHeight="32.0" prefWidth="164.0" text="Start extremal grouping" />
+                        <Button fx:id="startExtremalGrouping2Btn" layoutX="186.0" layoutY="54.0" mnemonicParsing="false" prefHeight="32.0000084472631" prefWidth="160.0" text="Start extremal grouping 2" visible="false" />
                       </children>
                     </Pane>
                     <TableView fx:id="factorsCorelationTable" layoutX="28.0" layoutY="137.0" prefHeight="405.0" prefWidth="338.0000999999975" />

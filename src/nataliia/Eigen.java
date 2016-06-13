@@ -3,19 +3,12 @@ package nataliia;
 import Jama.EigenvalueDecomposition;
 import Jama.Matrix;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+class Eigen {
 
-public class Eigen {
-
-    private double[][] matrix;
     private double[] values;
     private double[][] vectors;
 
-    public Eigen(double[][] corelMatrix) {
-        this.matrix = corelMatrix;
+    Eigen(double[][] corelMatrix) {
         Matrix matrix = new Matrix(corelMatrix);
         EigenvalueDecomposition eigDec = matrix.eig();
         values = eigDec.getRealEigenvalues();
@@ -52,11 +45,11 @@ public class Eigen {
         }
     }
 
-    public double[] getValues() {
+    double[] getValues() {
         return values;
     }
 
-    public double[][] getVectors() {
+    double[][] getVectors() {
         return vectors;
     }
 }
